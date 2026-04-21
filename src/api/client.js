@@ -101,6 +101,8 @@ export const fetchUniverse = () => apiGet("/data/universe");
 export const fetchHistory = (ticker) =>
   apiGet(`/data/history?ticker=${encodeURIComponent(ticker)}&period=6mo`);
 
+export const fetchMarketIndices = () => apiGet("/data/indices/live", { redirectOnAuthFailure: false });
+
 export { BASE, redirectToUpstoxLogin };
 
 export const fetchPartA = async (liquidTicker, illiquidTicker) => {

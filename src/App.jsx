@@ -1,6 +1,6 @@
 import { Component, useEffect, useState } from "react"
 import StockSelector from "@/components/StockSelector"
-import { ensureUpstoxLoginOnStartup, redirectToUpstoxLogin, fetchPartA, fetchPartB } from "@/api/client"
+import { ensureUpstoxLoginOnStartup, redirectToUpstoxLogin, fetchPartA, fetchPartB, fetchMarketIndices } from "@/api/client"
 import PartA from "@/components/PartA"
 import PartB from "@/components/PartB"
 import PartC from "@/components/PartC"
@@ -13,6 +13,27 @@ const NAV_ITEMS = [
   { id: "part-c", code: "PRT", label: "Portfolio & Hedging", shortLabel: "C" },
   { id: "part-d", code: "RSK", label: "Risk Measurement",    shortLabel: "D" },
 ]
+
+const DEFAULT_MARKET_INDICES = [
+  { sym: "NIFTY50", val: "--", chg: "--" },
+  { sym: "BANKNIFTY", val: "--", chg: "--" },
+  { sym: "INDIAVIX", val: "--", chg: "--" },
+]
+
+const formatIndexValue = (symbol, value) => {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "--"
+  const digits = symbol === "INDIAVIX" ? 2 : 2
+  return value.toLocaleString("en-IN", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  })
+}
+
+const formatIndexChange = (changePct) => {
+  if (typeof changePct !== "number" || !Number.isFinite(changePct)) return "--"
+  const sign = changePct >= 0 ? "+" : ""
+  return `${sign}${changePct.toFixed(2)}%`
+}
 
 function Clock() {
   const [time, setTime] = useState(new Date())
@@ -114,6 +135,7 @@ class ModuleErrorBoundary extends Component {
 export default function App() {
   const [activeTab, setActiveTab] = useState("part-a")
   const [authChecking, setAuthChecking] = useState(true)
+  const [marketIndices, setMarketIndices] = useState(DEFAULT_MARKET_INDICES)
   const {
     selectedStocks,
     partAData, setPartAData, isAnalyzing, setIsAnalyzing,
@@ -143,6 +165,38 @@ export default function App() {
       setAuthChecking(false)
     })()
     return () => { alive = false }
+  }, [])
+
+  useEffect(() => {
+    let alive = true
+
+    const pullIndices = async () => {
+      try {
+        const payload = await fetchMarketIndices()
+        if (!alive) return
+
+        const rows = Array.isArray(payload?.data?.indices) ? payload.data.indices : []
+        if (!rows.length) return
+
+        setMarketIndices(
+          rows.map((row) => ({
+            sym: row?.symbol || "--",
+            val: formatIndexValue(row?.symbol, row?.value),
+            chg: formatIndexChange(row?.change_pct),
+          }))
+        )
+      } catch {
+        // Keep previously shown values when the live pull fails.
+      }
+    }
+
+    pullIndices()
+    const timer = setInterval(pullIndices, 60000)
+
+    return () => {
+      alive = false
+      clearInterval(timer)
+    }
   }, [])
 
   const fetchPartAIfNeeded = async () => {
@@ -215,11 +269,7 @@ export default function App() {
         </div>
 
         <div className="hidden md:flex items-center gap-6 text-[10px] font-mono">
-          {[
-            { sym: "NIFTY50",   val: "24,532.10", chg: "+0.42%" },
-            { sym: "BANKNIFTY", val: "52,810.30", chg: "-0.17%" },
-            { sym: "INDIAVIX",  val: "14.22",     chg: "+1.03%" },
-          ].map(({ sym, val, chg }) => {
+          {marketIndices.map(({ sym, val, chg }) => {
             const up = chg.startsWith("+")
             return (
               <div key={sym} className="flex items-center gap-1.5">
