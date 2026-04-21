@@ -1,4 +1,20 @@
-const BASE = "http://127.0.0.1:8000";
+const DEFAULT_PROD_BASE = "https://web-production-06c6e.up.railway.app";
+
+const getApiBaseUrl = () => {
+  const envBase = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/+$/, "");
+  if (envBase) return envBase;
+
+  if (typeof window !== "undefined") {
+    const { hostname } = window.location;
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return "http://127.0.0.1:8000";
+    }
+  }
+
+  return DEFAULT_PROD_BASE;
+};
+
+const BASE = getApiBaseUrl();
 
 const UPSTOX_LOGIN_PATH = "/data/upstox/login";
 const UPSTOX_STATUS_PATH = "/data/upstox/status";
