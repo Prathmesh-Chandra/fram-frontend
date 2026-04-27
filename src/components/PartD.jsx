@@ -429,7 +429,7 @@ export default function PartD() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <StatTile label="Liquid Asset" value={liquidTicker} color={T.a} />
           <StatTile label="Illiquid Asset" value={illiquidTicker} color={T.b} />
           <StatTile label="Confidence Levels" value="95% / 99%" sub="1-day horizon" color={T.yellow} />

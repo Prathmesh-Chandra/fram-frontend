@@ -248,15 +248,15 @@ export default function App() {
   return (
     /* ROOT: exact viewport, no overflow — children control their own scroll */
     <div
-      className="h-screen flex flex-col overflow-hidden"
+      className="min-h-screen md:h-screen flex flex-col overflow-x-hidden md:overflow-hidden"
       style={{ background: "#0c0c0e", fontFamily: "'IBM Plex Sans', 'Helvetica Neue', sans-serif" }}
     >
       {/* ── TOP CHROME BAR ── never scrolls */}
       <header
-        className="flex items-center justify-between px-6 shrink-0 border-b border-border/50"
+        className="flex items-center justify-between px-3 sm:px-4 md:px-6 shrink-0 border-b border-border/50"
         style={{ height: 44, background: "#111114" }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <span
             className="w-5 h-5 rounded-sm grid place-items-center text-[10px] font-black text-black shrink-0"
             style={{ background: "linear-gradient(135deg,#e8f44a,#c5d63a)" }}
@@ -265,7 +265,7 @@ export default function App() {
           </span>
           <span className="text-xs font-bold tracking-widest uppercase text-foreground">FRAM</span>
           <span className="text-[10px] text-muted-foreground tracking-widest">/</span>
-          <span className="text-[10px] text-muted-foreground tracking-wider uppercase">Risk Terminal</span>
+          <span className="hidden sm:inline text-[10px] text-muted-foreground tracking-wider uppercase">Risk Terminal</span>
         </div>
 
         <div className="hidden md:flex items-center gap-6 text-[10px] font-mono">
@@ -281,16 +281,20 @@ export default function App() {
           })}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Clock />
-          <StatusPill label="session" value={upstoxStatus.user_name} pulse />
-          <StatusPill label="ttl" value={`${upstoxStatus.expires_in_hours}h`} />
+          <div className="hidden sm:block">
+            <StatusPill label="session" value={upstoxStatus.user_name} pulse />
+          </div>
+          <div className="hidden md:block">
+            <StatusPill label="ttl" value={`${upstoxStatus.expires_in_hours}h`} />
+          </div>
         </div>
       </header>
 
       {/* ── MODULE TAB BAR ── never scrolls */}
       <nav
-        className="flex items-stretch border-b border-border/40 shrink-0"
+        className="flex items-stretch border-b border-border/40 shrink-0 overflow-x-auto"
         style={{ height: 38, background: "#111114" }}
       >
         {NAV_ITEMS.map((item) => {
@@ -310,7 +314,7 @@ export default function App() {
                 }
               }}
               className={`
-                relative flex items-center gap-2 px-5 text-[11px] font-semibold tracking-wider uppercase
+                relative flex items-center gap-2 px-3 sm:px-4 md:px-5 text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase shrink-0 whitespace-nowrap
                 transition-colors duration-150 border-r border-border/30
                 ${active
                   ? "text-foreground bg-[#0c0c0e]"
@@ -328,17 +332,17 @@ export default function App() {
             </button>
           )
         })}
-        <div className="ml-auto flex items-center px-5">
+            <div className="ml-auto hidden sm:flex items-center px-4 md:px-5 shrink-0">
           <span className="text-[10px] font-mono text-muted-foreground/40 tracking-widest">v2.1.0</span>
         </div>
       </nav>
 
       {/* ── BODY: fills all remaining height. min-h-0 is critical for flex children to shrink */}
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-col md:flex-row flex-1 min-h-0">
 
         {/* ── LEFT SIDEBAR: fixed height, overflow-hidden — NEVER scrolls */}
         <aside
-          className="w-64 shrink-0 flex flex-col border-r border-border/40 overflow-hidden"
+          className="w-full md:w-64 shrink-0 flex flex-col border-b md:border-b-0 md:border-r border-border/40 md:overflow-hidden"
           style={{ background: "#111114" }}
         >
           <div className="px-4 pt-5 pb-3 border-b border-border/30 shrink-0">
@@ -347,10 +351,10 @@ export default function App() {
             </p>
           </div>
 
-          <div className="p-4 flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
+          <div className="p-4 flex-1 min-h-0 flex flex-col md:justify-between gap-4 md:gap-0">
             <StockSelector onAnalyze={handleAnalyze} />
 
-            <div className="space-y-2 pt-4 border-t border-border/20">
+            <div className="hidden md:block space-y-2 pt-4 border-t border-border/20">
               {[
                 { k: "Data Feed",  v: "UPSTOX LIVE", color: "text-emerald-400" },
                 { k: "Exchange",   v: "NSE · BSE",   color: "text-foreground/70" },
@@ -370,7 +374,7 @@ export default function App() {
 
           {/* Sub-header breadcrumb — fixed, never scrolls */}
           <div
-            className="flex items-center justify-between px-6 py-3 border-b border-border/30 shrink-0"
+            className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-3 border-b border-border/30 shrink-0"
             style={{ background: "#0e0e10" }}
           >
             <div className="flex items-center gap-2">
@@ -382,7 +386,7 @@ export default function App() {
               <span className="text-[10px] font-mono text-muted-foreground/40">/</span>
               <span className="text-[10px] font-mono text-muted-foreground">{activeNav?.label}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[10px] font-mono text-muted-foreground/50">LIVE</span>
             </div>
@@ -391,7 +395,7 @@ export default function App() {
           {/* ── THE ONLY SCROLLABLE REGION in the entire app ── */}
           <div
             key={activeTab}
-            className="flex-1 overflow-y-auto p-6 pb-10"
+            className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 pb-8 md:pb-10"
             style={{ background: "#0c0c0e" }}
           >
             {activeTab === "part-a" && (

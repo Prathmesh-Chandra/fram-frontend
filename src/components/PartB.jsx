@@ -477,7 +477,7 @@ export default function PartB() {
       {/* ── 2. OVERVIEW CARDS ────────────────────────────────────────────── */}
       <section>
         <SectionHeader label="Underlying Overview" sub={curTick} />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard label="Spot Price"        value={cur?.spot ? `₹${Number(cur.spot).toFixed(2)}` : "—"} />
           <StatCard label="Historical Vol"    value={fmtPct(cur?.hist_vol_pct)}  accent={curColor} />
           <StatCard label="30d Expiry"        value={expiry(30)} />
@@ -624,7 +624,7 @@ export default function PartB() {
       {/* ── 5. COMPARISON STRIP ──────────────────────────────────────────── */}
       <section>
         <SectionHeader label="Liquid vs. Illiquid Comparison" sub="Cross-stock vol sensitivity" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { label: `${lTick} Hist. Vol`,        value: fmtPct(comp?.hist_vol_pct?.liquid),                 color: T.a },
             { label: `${iTick} Hist. Vol`,         value: fmtPct(comp?.hist_vol_pct?.illiquid),              color: T.b },

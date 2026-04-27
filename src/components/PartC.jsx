@@ -496,7 +496,7 @@ export default function PartC() {
         </div>
 
         {/* Thumbnail strip for other 3 Greeks */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {Object.entries(greekMeta).filter(([k])=>k!==activeGreek).map(([k,{label,tickFmt}])=>{
             const ld=mergeCurves(lCurves.call,lCurves.put,k)
             return (
@@ -525,7 +525,7 @@ export default function PartC() {
         <SectionHeader label="Portfolio Builder" sub="Cross-stock · both liquid & illiquid legs in one portfolio"/>
 
         {/* Context tiles */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 mb-5">
           <MetricTile label={`${lTick} Spot`}     value={fmtINR(lSpot)}                      color={T.a}/>
           <MetricTile label={`${lTick} Hist Vol`}  value={fmtPct(lStock.hist_vol_pct)}        color={T.accent}/>
           <MetricTile label={`${iTick} Spot`}     value={fmtINR(iSpot)}                      color={T.b}/>
@@ -748,7 +748,7 @@ export default function PartC() {
                   <span className="w-2 h-2 rounded-full" style={{background:color}}/>
                   <span className="text-[11px] font-bold uppercase tracking-widest" style={{color:"#d0d0e0"}}>{ticker} — Hedge Details</span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 p-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4">
                   <MetricTile label="Net Portfolio Δ"  value={fmt4(hedg.net_portfolio_delta)}       color={color}/>
                   <MetricTile label="Raw Shares"       value={fmt2(hedg.shares_to_hedge_raw)}        color={hedg.shares_to_hedge_raw>=0?T.green:T.red}
                     sub={hedg.shares_to_hedge_raw>=0?"Buy underlying":"Sell underlying"}/>

@@ -540,7 +540,7 @@ export default function PartA() {
       {/* ── 2. KPI ROW ──────────────────────────────────────────────────────── */}
       <section>
         <SectionHeader label="Key Metrics" sub="6-month window · Annualised" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard
             label="Annualised Volatility"
             lVal={fmtPct(annVolL)} iVal={fmtPct(annVolI)}
@@ -608,7 +608,7 @@ export default function PartA() {
 
           {/* Vol / Liquidity Correlation */}
           <Insight title="Volatility–Liquidity Correlation">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 { ticker: lTick, color: T.a, corr: corrL },
                 { ticker: iTick, color: T.b, corr: corrI },
@@ -634,7 +634,7 @@ export default function PartA() {
 
           {/* Tail Risk */}
           <Insight title="Tail Risk Summary">
-            <div className="grid grid-cols-2 gap-4 text-[11px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[11px]">
               {[
                 { ticker: lTick, color: T.a, s: lStat },
                 { ticker: iTick, color: T.b, s: iStat },
@@ -662,7 +662,7 @@ export default function PartA() {
 
           {/* Liquidity Classification */}
           <Insight title="Liquidity Classification">
-            <div className="grid grid-cols-2 gap-4 text-[11px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[11px]">
               {[
                 { ticker: lTick, color: T.a, s: lLStat },
                 { ticker: iTick, color: T.b, s: iLStat },
@@ -705,12 +705,12 @@ export default function PartA() {
         >
           {/* Table header */}
           <div
-            className="grid px-5 py-3"
+            className="grid px-4 sm:px-5 py-3"
             style={{
               background: T.surfaceHi,
               borderBottom: `1px solid ${T.divider}`,
               gridTemplateColumns: "1fr auto auto",
-              gap: "0 48px",
+              gap: "0 24px",
             }}
           >
             <span
@@ -723,27 +723,29 @@ export default function PartA() {
             <StockBadge ticker={iTick} variant="illiquid" />
           </div>
 
-          <table className="w-full text-left">
-            <colgroup>
-              <col style={{ width: "50%" }} />
-              <col style={{ width: "25%" }} />
-              <col style={{ width: "25%" }} />
-            </colgroup>
-            <tbody>
-              <Row label="Trading Days"           lVal={lStat?.n_trading_days}             iVal={iStat?.n_trading_days} />
-              <Row label="Mean Daily Return"      lVal={fmt4(lStat?.mean_daily_return)}     iVal={fmt4(iStat?.mean_daily_return)} />
-              <Row label="Std Dev (Daily)"        lVal={fmt4(lStat?.std_daily_return)}      iVal={fmt4(iStat?.std_daily_return)} />
-              <Row label="Skewness"               lVal={fmt4(lStat?.skewness)}              iVal={fmt4(iStat?.skewness)} />
-              <Row label="Excess Kurtosis"        lVal={fmt4(lStat?.excess_kurtosis)}       iVal={fmt4(iStat?.excess_kurtosis)} />
-              <Row label="Min Daily Return"       lVal={fmt4(lStat?.min_return)}            iVal={fmt4(iStat?.min_return)} />
-              <Row label="Max Daily Return"       lVal={fmt4(lStat?.max_return)}            iVal={fmt4(iStat?.max_return)} />
-              <Row label="Ann. Volatility (hist)" lVal={fmtPct(annVolL)}                   iVal={fmtPct(annVolI)}         hi />
-              <Row label="Avg Daily Turnover"     lVal={fmtCr(lLStat?.avg_daily_turnover_cr)} iVal={fmtCr(iLStat?.avg_daily_turnover_cr)} />
-              <Row label="Avg Amihud Illiquidity" lVal={fmt4(lLStat?.avg_amihud_scaled_1e7)}  iVal={fmt4(iLStat?.avg_amihud_scaled_1e7)}  hi />
-              <Row label="Turnover Ratio Mean"    lVal={fmt4(lLStat?.turnover_ratio_mean)}  iVal={fmt4(iLStat?.turnover_ratio_mean)} />
-              <Row label="Turnover Ratio Std"     lVal={fmt4(lLStat?.turnover_ratio_std)}   iVal={fmt4(iLStat?.turnover_ratio_std)} />
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left">
+              <colgroup>
+                <col style={{ width: "50%" }} />
+                <col style={{ width: "25%" }} />
+                <col style={{ width: "25%" }} />
+              </colgroup>
+              <tbody>
+                <Row label="Trading Days"           lVal={lStat?.n_trading_days}             iVal={iStat?.n_trading_days} />
+                <Row label="Mean Daily Return"      lVal={fmt4(lStat?.mean_daily_return)}     iVal={fmt4(iStat?.mean_daily_return)} />
+                <Row label="Std Dev (Daily)"        lVal={fmt4(lStat?.std_daily_return)}      iVal={fmt4(iStat?.std_daily_return)} />
+                <Row label="Skewness"               lVal={fmt4(lStat?.skewness)}              iVal={fmt4(iStat?.skewness)} />
+                <Row label="Excess Kurtosis"        lVal={fmt4(lStat?.excess_kurtosis)}       iVal={fmt4(iStat?.excess_kurtosis)} />
+                <Row label="Min Daily Return"       lVal={fmt4(lStat?.min_return)}            iVal={fmt4(iStat?.min_return)} />
+                <Row label="Max Daily Return"       lVal={fmt4(lStat?.max_return)}            iVal={fmt4(iStat?.max_return)} />
+                <Row label="Ann. Volatility (hist)" lVal={fmtPct(annVolL)}                   iVal={fmtPct(annVolI)}         hi />
+                <Row label="Avg Daily Turnover"     lVal={fmtCr(lLStat?.avg_daily_turnover_cr)} iVal={fmtCr(iLStat?.avg_daily_turnover_cr)} />
+                <Row label="Avg Amihud Illiquidity" lVal={fmt4(lLStat?.avg_amihud_scaled_1e7)}  iVal={fmt4(iLStat?.avg_amihud_scaled_1e7)}  hi />
+                <Row label="Turnover Ratio Mean"    lVal={fmt4(lLStat?.turnover_ratio_mean)}  iVal={fmt4(iLStat?.turnover_ratio_mean)} />
+                <Row label="Turnover Ratio Std"     lVal={fmt4(lLStat?.turnover_ratio_std)}   iVal={fmt4(iLStat?.turnover_ratio_std)} />
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
