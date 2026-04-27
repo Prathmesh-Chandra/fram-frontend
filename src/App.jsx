@@ -154,7 +154,13 @@ export default function App() {
       const status = await ensureUpstoxLoginOnStartup()
       if (!alive) return
       if (!status?.authenticated) {
-        redirectToUpstoxLogin(status?.login_url || "/data/upstox/login")
+        // Allow guest fallback mode so Part A can still run even if Upstox auth is down.
+        setUpstoxStatus({
+          authenticated: false,
+          user_name: "Guest",
+          expires_in_hours: null,
+        })
+        setAuthChecking(false)
         return
       }
       setUpstoxStatus({
@@ -284,10 +290,13 @@ export default function App() {
         <div className="flex items-center gap-2 sm:gap-3">
           <Clock />
           <div className="hidden sm:block">
-            <StatusPill label="session" value={upstoxStatus.user_name} pulse />
+            <StatusPill label="session" value={upstoxStatus.user_name} pulse={upstoxStatus.authenticated} />
           </div>
           <div className="hidden md:block">
-            <StatusPill label="ttl" value={`${upstoxStatus.expires_in_hours}h`} />
+            <StatusPill
+              label="ttl"
+              value={upstoxStatus.authenticated ? `${upstoxStatus.expires_in_hours}h` : "offline"}
+            />
           </div>
         </div>
       </header>

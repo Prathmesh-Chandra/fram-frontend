@@ -85,13 +85,9 @@ export const fetchUpstoxStatus = (options = {}) => apiGet(UPSTOX_STATUS_PATH, op
 export const ensureUpstoxLoginOnStartup = async () => {
   try {
     const status = await fetchUpstoxStatus({ redirectOnAuthFailure: false });
-    if (!status?.authenticated) {
-      redirectToUpstoxLogin(status?.login_url || UPSTOX_LOGIN_PATH);
-      return null;
-    }
+    if (!status?.authenticated) return null;
     return status;
   } catch {
-    redirectToUpstoxLogin(UPSTOX_LOGIN_PATH);
     return null;
   }
 };
