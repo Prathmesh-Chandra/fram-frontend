@@ -56,6 +56,27 @@ const fmtPct = (v) => (Number.isFinite(+v) ? `${Number(v).toFixed(2)}%` : "—")
 const fmtINR = (v) => (Number.isFinite(+v) ? `₹${Number(v).toLocaleString("en-IN", { maximumFractionDigits: 2 })}` : "—")
 const fmtSgn = (v) => (Number.isFinite(+v) ? (v >= 0 ? `+${Number(v).toFixed(2)}` : Number(v).toFixed(2)) : "—")
 
+function getRowMoneynessLabel(row) {
+  const raw = String(row?.moneyness_label || row?.moneyness || "").toUpperCase()
+  if (raw.includes("ATM")) return "ATM"
+  if (raw.includes("ITM")) return "ITM"
+  if (raw.includes("OTM")) return "OTM"
+
+  const strike = Number(row?.strike)
+  const spot = Number(row?.spot)
+  const opt = String(row?.option_type || "").toUpperCase()
+  if (!Number.isFinite(strike) || !Number.isFinite(spot) || !opt) return "—"
+
+  // A small tolerance avoids misclassifying near-ATM strikes due to quote drift.
+  const atmBand = 0.0025
+  const rel = Math.abs(strike - spot) / Math.max(spot, 1)
+  if (rel <= atmBand) return "ATM"
+
+  if (opt === "CALL") return strike < spot ? "ITM" : "OTM"
+  if (opt === "PUT") return strike > spot ? "ITM" : "OTM"
+  return "—"
+}
+
 const TTStyle = {
   contentStyle: { backgroundColor: T.ttBg, border: `1px solid ${T.ttBorder}`, borderRadius: 6, fontSize: 11, fontFamily: "'DM Mono','Fira Code',monospace", padding: "8px 12px", boxShadow: "0 8px 32px #00000080" },
   labelStyle:  { color: T.muted, marginBottom: 4, fontSize: 10 },
@@ -172,6 +193,7 @@ function StockBadge({ ticker, color }) {
 // ─── LegRow ─────────────────────────────────────────────────────────────────────
 function LegRow({ row, qty, onQtyChange, stockColor }) {
   const tc = row.option_type?.toUpperCase()==="CALL" ? T.green : T.red
+  const moneynessLabel = getRowMoneynessLabel(row)
   const marketPx = Number.isFinite(Number(row.market_price)) && Number(row.market_price) > 0
     ? Number(row.market_price)
     : null
@@ -185,7 +207,7 @@ function LegRow({ row, qty, onQtyChange, stockColor }) {
     <tr className="border-b hover:bg-white/[0.018] transition-colors" style={{borderColor:T.divider}}>
       <td className="py-2 px-3 text-[10px] font-mono font-bold" style={{color:stockColor}}>{row._ticker}</td>
       <td className="py-2 px-3 text-[11px] font-mono font-bold" style={{color:tc}}>{row.option_type?.toUpperCase()}</td>
-      <td className="py-2 px-3 text-[11px] font-mono" style={{color:T.muted}}>{row.moneyness_label||"—"}</td>
+      <td className="py-2 px-3 text-[11px] font-mono" style={{color:T.muted}}>{moneynessLabel}</td>
       <td className="py-2 px-3 text-[11px] font-mono tabular-nums" style={{color:"#c0c0d0"}}>{row.target_maturity_days}d</td>
       <td className="py-2 px-3 text-[11px] font-mono tabular-nums text-right" style={{color:"#c0c0d0"}}>{fmt2(row.strike)}</td>
       <td className="py-2 px-3 text-[11px] font-mono tabular-nums text-right" style={{color:"#d0d0e0"}}>
@@ -361,7 +383,7 @@ export default function PartC() {
     ticker, spot, current_vol_pct: histVolPct,
     turnover_ratio: Number.isFinite(effTr)?effTr:1.0,
     positions: legs.map(({row,qty})=>({
-      identifier: `${row.target_maturity_days}d ${row.moneyness_label||""} ${row.option_type}`.trim(),
+      identifier: `${row.target_maturity_days}d ${getRowMoneynessLabel(row)} ${row.option_type}`.trim(),
       quantity:   qty,
       bsm_price:  Number(row.bsm_price_hist_vol)||0,
       delta:      Number(row.delta)||0,
@@ -390,7 +412,7 @@ export default function PartC() {
           liquid: activeL.map(({ row, qty }) => ({
             ticker: row._ticker,
             option_type: row.option_type,
-            moneyness_label: row.moneyness_label,
+            moneyness_label: getRowMoneynessLabel(row),
             target_maturity_days: row.target_maturity_days,
             strike: row.strike,
             quantity: qty,
@@ -398,7 +420,7 @@ export default function PartC() {
           illiquid: activeI.map(({ row, qty }) => ({
             ticker: row._ticker,
             option_type: row.option_type,
-            moneyness_label: row.moneyness_label,
+            moneyness_label: getRowMoneynessLabel(row),
             target_maturity_days: row.target_maturity_days,
             strike: row.strike,
             quantity: qty,
