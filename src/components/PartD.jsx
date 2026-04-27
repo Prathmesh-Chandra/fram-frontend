@@ -60,48 +60,7 @@ const fmtSigned = (v, d = 4) => {
   return `${n >= 0 ? "+" : ""}${n.toFixed(d)}`
 }
 
-// ─── Client-side Math & Simulation Helpers ────────────────────────────────────
-function mulberry32(seed) {
-  let t = seed
-  return function rand() {
-    t += 0x6d2b79f5
-    let r = Math.imul(t ^ (t >>> 15), 1 | t)
-    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r)
-    return ((r ^ (r >>> 14)) >>> 0) / 4294967296
-  }
-}
-
-function randomNormal(rand) {
-  const u1 = Math.max(rand(), 1e-12)
-  const u2 = rand()
-  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)
-}
-
-function hashSeed(text = "") {
-  let h = 2166136261
-  for (let i = 0; i < text.length; i += 1) {
-    h ^= text.charCodeAt(i)
-    h = Math.imul(h, 16777619)
-  }
-  return Math.abs(h)
-}
-
-function makeEmpiricalSeries({ seed, n, sigmaPct }) {
-  const rand = mulberry32(seed)
-  const out = []
-  for (let i = 0; i < n; i += 1) {
-    const shock = rand() < 0.12 ? 1.9 : 1
-    out.push(randomNormal(rand) * sigmaPct * shock)
-  }
-  return out
-}
-
-function makeMonteCarloSeries({ seed, n, sigmaPct }) {
-  const rand = mulberry32(seed)
-  const out = []
-  for (let i = 0; i < n; i += 1) out.push(randomNormal(rand) * sigmaPct)
-  return out
-}
+// ─── Client-side Histogram Helpers (using backend series) ────────────────────
 
 function buildHistogram(values, bins = 46) {
   if (!values?.length) return []
@@ -264,7 +223,7 @@ function mapRegimeRows(asset = {}) {
     .filter(Boolean)
 }
 
-function buildAssetView(asset, color, fallbackSeedOffset = 0) {
+function buildAssetView(asset, color) {
   const rows = mapRegimeRows(asset)
   const allRow = rows.find((r) => r.regime === "All data")
   if (!rows.length || !allRow) return null
@@ -274,19 +233,14 @@ function buildAssetView(asset, color, fallbackSeedOffset = 0) {
   const g95 = Number(asset?.garch_var?.garch_var_95_pct || 0)
   const g99 = Number(asset?.garch_var?.garch_var_99_pct || 0)
 
-  const seed = (hashSeed(asset?.ticker || "") + fallbackSeedOffset) >>> 0
-  const empiricalSeries = makeEmpiricalSeries({
-    seed: seed || 11,
-    n: Math.max(20, allRow.nDays || 122),
-    sigmaPct: Math.max(0.01, allRow.sigmaDaily || 0.8),
-  })
+  const empiricalSeries = Array.isArray(asset?.empirical_returns_pct)
+    ? asset.empirical_returns_pct.filter((v) => Number.isFinite(v))
+    : []
+  const mcSeries = Array.isArray(asset?.monte_carlo_var?.simulated_returns_pct_sample)
+    ? asset.monte_carlo_var.simulated_returns_pct_sample.filter((v) => Number.isFinite(v))
+    : []
 
-  const mcSigmaPct = Math.max(0.01, (mc95 || allRow.var95 || 1) / 1.645)
-  const mcSeries = makeMonteCarloSeries({
-    seed: seed + 101,
-    n: 50000,
-    sigmaPct: mcSigmaPct,
-  })
+  if (!empiricalSeries.length || !mcSeries.length) return null
 
   const empHist = buildHistogram(empiricalSeries, 36)
   const mcHist = buildHistogram(mcSeries, 54)
@@ -367,8 +321,8 @@ export default function PartD() {
 
   const assetViews = useMemo(() => {
     if (!riskData) return []
-    const l = buildAssetView(riskData.liquid_asset, T.a, 19)
-    const i = buildAssetView(riskData.illiquid_asset, T.b, 31)
+    const l = buildAssetView(riskData.liquid_asset, T.a)
+    const i = buildAssetView(riskData.illiquid_asset, T.b)
     return [l, i].filter(Boolean)
   }, [riskData])
 
