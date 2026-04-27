@@ -724,7 +724,7 @@ export default function PartA() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left">
+            <table className="w-full min-w-160 text-left">
               <colgroup>
                 <col style={{ width: "50%" }} />
                 <col style={{ width: "25%" }} />
