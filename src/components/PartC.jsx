@@ -172,6 +172,15 @@ function StockBadge({ ticker, color }) {
 // ─── LegRow ─────────────────────────────────────────────────────────────────────
 function LegRow({ row, qty, onQtyChange, stockColor }) {
   const tc = row.option_type?.toUpperCase()==="CALL" ? T.green : T.red
+  const marketPx = Number.isFinite(Number(row.market_price)) && Number(row.market_price) > 0
+    ? Number(row.market_price)
+    : null
+  const modelPx = Number.isFinite(Number(row.bsm_price_hist_vol))
+    ? Number(row.bsm_price_hist_vol)
+    : null
+  const spreadPct = Number.isFinite(Number(row.price_deviation_pct))
+    ? Number(row.price_deviation_pct)
+    : null
   return (
     <tr className="border-b hover:bg-white/[0.018] transition-colors" style={{borderColor:T.divider}}>
       <td className="py-2 px-3 text-[10px] font-mono font-bold" style={{color:stockColor}}>{row._ticker}</td>
@@ -179,7 +188,15 @@ function LegRow({ row, qty, onQtyChange, stockColor }) {
       <td className="py-2 px-3 text-[11px] font-mono" style={{color:T.muted}}>{row.moneyness_label||"—"}</td>
       <td className="py-2 px-3 text-[11px] font-mono tabular-nums" style={{color:"#c0c0d0"}}>{row.target_maturity_days}d</td>
       <td className="py-2 px-3 text-[11px] font-mono tabular-nums text-right" style={{color:"#c0c0d0"}}>{fmt2(row.strike)}</td>
-      <td className="py-2 px-3 text-[11px] font-mono tabular-nums text-right" style={{color:T.yellow}}>{fmt2(row.bsm_price_hist_vol)}</td>
+      <td className="py-2 px-3 text-[11px] font-mono tabular-nums text-right" style={{color:"#d0d0e0"}}>
+        {marketPx != null ? `₹${fmt2(marketPx)}` : "—"}
+      </td>
+      <td className="py-2 px-3 text-[11px] font-mono tabular-nums text-right" style={{color:T.yellow}}>
+        {modelPx != null ? `₹${fmt2(modelPx)}` : "—"}
+      </td>
+      <td className="py-2 px-3 text-[11px] font-mono tabular-nums text-right" style={{color:spreadPct != null && spreadPct >= 0 ? T.green : T.red}}>
+        {spreadPct != null ? `${spreadPct >= 0 ? "+" : ""}${fmt2(spreadPct)}%` : "—"}
+      </td>
       <td className="py-2 px-3 text-[11px] font-mono tabular-nums text-right" style={{color:T.a}}>{fmt4(row.delta)}</td>
       <td className="py-2 px-3 text-[11px] font-mono tabular-nums text-right" style={{color:T.accent}}>{fmt4(row.gamma)}</td>
       <td className="py-2 px-3 text-[11px] font-mono tabular-nums text-right" style={{color:T.b}}>{fmt4(row.vega)}</td>
@@ -559,7 +576,7 @@ export default function PartC() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr style={{borderBottom:`1px solid ${T.divider}`}}>
-                  {["Stock","Type","Moneyness","Mat.","Strike","BSM Price","Delta","Gamma","Vega","Quantity"].map(h=>(
+                  {["Stock","Type","Moneyness","Mat.","Strike","Mkt Price","Model Price","Spread %","Delta","Gamma","Vega","Quantity"].map(h=>(
                     <th key={h} className="py-2 px-3 text-[9px] font-bold uppercase tracking-[0.14em]" style={{color:T.muted}}>{h}</th>
                   ))}
                 </tr>
@@ -567,7 +584,7 @@ export default function PartC() {
               <tbody>
                 {lRows.length>0&&(<>
                   <tr style={{background:T.aDim}}>
-                    <td colSpan={10} className="py-1.5 px-3 text-[9px] font-bold uppercase tracking-widest" style={{color:T.a}}>● {lTick} — Liquid</td>
+                    <td colSpan={12} className="py-1.5 px-3 text-[9px] font-bold uppercase tracking-widest" style={{color:T.a}}>● {lTick} — Liquid</td>
                   </tr>
                   {lRows.map((row,idx)=>(
                     <LegRow key={`L:${idx}`} row={{...row,_ticker:lTick}} qty={quantities[`L:${idx}`]||0}
@@ -576,7 +593,7 @@ export default function PartC() {
                 </>)}
                 {iRows.length>0&&(<>
                   <tr style={{background:T.bDim}}>
-                    <td colSpan={10} className="py-1.5 px-3 text-[9px] font-bold uppercase tracking-widest" style={{color:T.b}}>● {iTick} — Illiquid</td>
+                    <td colSpan={12} className="py-1.5 px-3 text-[9px] font-bold uppercase tracking-widest" style={{color:T.b}}>● {iTick} — Illiquid</td>
                   </tr>
                   {iRows.map((row,idx)=>(
                     <LegRow key={`I:${idx}`} row={{...row,_ticker:iTick}} qty={quantities[`I:${idx}`]||0}
